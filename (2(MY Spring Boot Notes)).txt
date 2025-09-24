@@ -1,0 +1,1018 @@
+=======================================
+lec-14 : Spring Boot & Microservices
+=======================================
+
+Q) Why Use Spring Boot When We Already Have Spring Framework?
+--> Spring Framework is powerful but requires a lot of setup — like configuring XML files, setting up servers, adding dependencies manually, etc.
+
+Spring Boot solves this by making Spring development faster and easier.
+
+1) What is Spring Boot ?
+
+2) Why Spring Boot ?
+
+3) Advantages with Spring Boot
+
+4) What type of apps we can build using boot ?
+
+JAR AND WAR FILE
+
+
+=======================
+What is Spring Boot ?
+======================
+
+=> Spring Boot is an approach to develop spring framework based applications with less configurations.
+
+=> Spring Boot is an extension for existing spring framework.
+
+=> Spring Boot internally uses spring framework only.
+
+=> Spring Boot supports rapid application development.
+
+	Spring Boot = (Spring + Auto Config) - xml config
+
+=======================================================
+What type of applications we can create using boot ?
+=======================================================
+
+=> By using this spring boot we can develop several types of applications
+
+			a) stand-alone app
+			b) web application ( C2B )
+			c) distributed application (B2B)
+                         (webservices / rest apis)
+
+========================
+Spring Boot Advantages	
+========================
+
+1) POM starters
+
+2) Dependency Version Conflicts solution
+
+3) Embedded Servers
+
+4) Auto Configuration
+
+5) Actuators....
+
+===========================
+What is POM starter ?
+===========================
+
+=> pom starters are used to simplify maven or gradle configurations
+
+=> We have several pom starters
+
+			a) spring-boot-starter-web
+
+			b) spring-boot-starter-data-jpa
+
+			c) spring-boot-starter-mail
+
+			d) spring-boot-starter-security
+
+Note: when we add pom starter boot will take care of dependency version.
+
+==================
+Embedded Servers
+==================
+
+=> Spring Boot will provide servers to run our application
+
+		a) tomcat (default)
+		b) jetty
+		c) netty
+
+===================
+Auto Configuration 
+===================
+
+=> It is one of the most imp feature in spring boot
+
+=> Boot will identify configurations required for the application based on pom starters and it will provide that configuration in runtime.
+
+(Chat gpt)	
+==> Spring Boot's Auto-Configuration automatically configures beans based on the classpath and dependencies, reducing manual setup.
+
+=> How It Works:
+  1)Checks dependencies (e.g., if spring-web is present, configures a web app).
+  2)Uses @EnableAutoConfiguration (or @SpringBootApplication, which includes it).
+  3)Loads pre-defined configurations from spring-boot-autoconfigure JAR.
+
+===============
+Actuators	
+==============
+
+=> Spring Boot Actuator is a tool that provides monitoring and management features for Spring Boot applications. It helps developers check app health, metrics, logs, and environment details without writing extra code.
+
+=> Production Ready Features
+
+		/health
+		/beans
+		/mappings
+		/configProps
+		/heapdump
+ 		/threaddemp
+===== 
+gpt
+=====
+Health Checks - Provides the status of the application (UP/DOWN).
+Metrics - Monitors application performance (CPU usage, memory, HTTP requests, etc.).
+Info Endpoint - Displays application details like version and environment.
+Tracing & Logging - Helps in debugging and monitoring logs.
+Thread Dumps & Heap Dumps - Useful for performance analysis.
+
+=======================================
+Lec-15 : Developing Spring Boot Apps
+=======================================
+
+=> We can develop in 2 ways
+
+		a) Spring Initializer website (start.spring.io)
+
+				-> Create Project
+				-> Download as zip file
+				-> Extract zip file
+				-> Import into IDE as Maven project
+
+		b) IDE (STS/IntelliJ)
+
+===========================================
+Spring Boot Application Folder Structure
+===========================================
+
+src/main/java   => To write application source code
+
+	- Application.java  (Start class & Entry Point)
+
+src/main/resources	=> To keep application config file
+
+	- application.properties
+
+src/test/java		=> To write junit test cases
+
+	- ApplicationTest.java
+
+src/test/resources	=> To keep unit test config files
+
+Maven Dependencies  => libraries downloaded
+
+target  => byte code (.class files)
+
+pom.xml => Maven config file
+
+
+======================================
+What is start class in Spring Boot ?
+======================================
+
+=> Start class is entry point for boot application execution
+
+=> It is also called as main class in spring boot
+
+=> When we create boot application, start class will be created by default.
+
+@SpringBootApplication
+public class Application {
+
+	public static void main(String[] args) {
+		SpringApplication.run(Application.class, args);
+	}
+
+}
+=====================================
+What is an Annotation in Spring Boot?
+=====================================
+Annotations in Spring Boot are special markers (metadata) used to provide instructions to the Spring framework at runtime. They help in reducing XML configuration and make the code more readable and maintainable.
+
+===========================================
+What is @SpringBootApplication annotation?
+==========================================
+
+=> This is used at start class of spring boot...
+
+=> This is equal to 3 annotations
+
+	a) @SpringBootConfiguration
+	b) @EnableAutoConfiguration
+	c) @ComponentScan
+
+1) @SpringBootConfiguration: It is a meta-annotation that combines @Configuration, used for defining Spring Boot configuration classes, typically in test scenarios.
+2) @EnableAutoConfiguration: 
+--> it Says Spring, please set up everything automatically based on the jars I added.
+--> It enables Spring Boot's auto-configuration mechanism, automatically configuring beans based on class path dependencies.
+Example:
+If you have spring-boot-starter-web, it will auto-configure Tomcat + DispatcherServlet + Jackson (JSON).
+
+=======================================
+3) What is @ComponentScan annotation ?
+=======================================
+
+=> Says: "Look in this package (and sub-packages) to find my classes like @Service, @Controller, etc., and make them ready to use."
+=> It is used to scan the project and identify spring beans available in the application.
+
+=> Component Scanning works based on base-package of application.
+
+Note: The package which contains start class of spring boot is called as base package.
+
+=> The packages which are starting with base package name are called as sub packages.
+
+			in.ashokit
+				- Application.java
+
+			in.ashokit.service
+			in.ashokit.dao
+			in.ashokit.controller
+			in.ashokit.util
+
+			com.ashokit ---------- will not be scanned
+
+===========
+Lec-16 
+===========
+
+
+=============================================================
+Q) Can we configure more than one base package in the app ?
+==============================================================
+
+@SpringBootApplication
+@ComponentScan(basePackages = { "in.ashokit", "com.tcs" })
+public class Application {
+
+	public static void main(String[] args) {
+		SpringApplication.run(Application.class, args);
+	}
+
+}
+
+
+
+===============================================
+Q) How to represent java class as Spring Bean ?
+===============================================
+
+@Component : To represent java class as spring bean(for normal java class)
+	
+@Service : To represent java class as spring bean(for business logic)
+
+@Repository : To represent java class as spring bean(for database connection class)
+
+@Configuration : To represent java class as configuration class(what @Configuration :- that defines bean definitions and Spring application settings.)
+
+@Bean : To customize objs creation process ( it is method level annotation [uper three are class level])
+
+@Controller  : To handle http requests in web app (c2b)
+
+@RestController : To handle http requests in rest apis.(b2b)
+
+@ComponentScan : To scan spring beans in our applications
+
+
+Ways to Create Beans in Spring
+
+1) Using @Component (and related annotations like @Service, @Repository)
+
+-Put the annotation on a class.
+
+-Spring’s component scanning detects it and creates one bean for that class.
+
+-Bean name (by default) = class name with the first letter small (EmailUtils → emailUtils).
+
+-Best for your own application classes (services, utils, repos, etc.).
+
+2)Using @Configuration + @Bean
+
+-Create a @Configuration class.
+
+-Inside it, define methods with @Bean.
+
+-Each method creates and returns one bean.  (create object and pass as a bean)
+
+-Bean name (by default) = method name (can be overridden).
+
+-Useful when you need:
+
+-Multiple beans of the same class with different configs.
+
+-Beans of third-party classes (you can’t put @Component on them).
+
+-Extra logic while creating the bean.
+
+🔑 Key Point
+
+@Component → one bean = one class (direct object creation).
+
+@Configuration + @Bean → multiple beans possible from the same class, distinguished by method names.
+
+✅ “But in configuration class we only pass one object, how is it convert to prototype if we want to convert ?”
+
+👉 Answer: Because Spring wraps the @Bean methods in a proxy, and depending on the scope 
+	(singleton or prototype), it decides whether to reuse the existing object(singleton) or invoke your 
+	method again to create a new one(prototype).
+	ex :    @Bean
+		@Scope("prototype")
+		Demo demo1() {...}
+=========
+**lec-17
+=========
+
+
+=======================================================
+Q) What is run ( ) method in spring boot start class ?
+=======================================================
+
+=> It is entry point for boot application execution
+
+            1)  Bootstrap Context    → Initializes the basic setup for the Spring Boot application.
+            2)  Starting Listeners   → Notifies registered listeners about application startup events.
+            3)  Prepare Environment  → Loads environment variables, properties, and configurations.
+            4)  Printing Banner      → Displays the Spring Boot startup banner (can be customized or disabled).
+            5)  Create Context (IoC) → Instantiates the Spring ApplicationContext (IoC container).
+            6)  Prepare Context      → Registers beans, configures dependencies, and initializes the context.
+            7)  Call Runners         → Executes CommandLineRunner and ApplicationRunner beans (if present).
+            8)  Return IoC           → Finalizes the context and makes it available for the application to use.
+
+
+================================
+What is banner in Spring Boot ?	
+================================
+
+=> Logo which is printing on console is called banner
+
+=> By default spring logo will be printed on console
+
+=> We can customize banner text by creating "banner.txt"
+
+		File location : src/main/resources	
+
+=> Banner works based on modes
+
+			1) console (default)
+
+			2) log (print in log file)
+
+			3) off
+
+=> We can banner mode like below in application.properties file
+
+			spring.main.banner-mode=off
+
+===============================================
+How IoC will be started in boot application ?
+===============================================
+
+=> run ( ) method is responsible to start IOC in boot app
+
+=> run ( ) method will use predefined class to start IOC based on pom starter
+
+default app (standalone) : spring-boot-starter
+
+		Class : AnnotationConfigApplicationContext	
+
+web app : spring-boot-starter-web (tomcat)
+
+		Class:  AnnotationConfigServletWebServerApplicationContext
+
+reactive app : spring-boot-starter-webflux (netty)
+
+	Class :  AnnotationConfigReactiveWebServerApplicationContext
+
+
+=================================
+What is Runner in Spring Boot ?	
+=================================
+
+=> Runner is used to execute logic only once when application started.
+
+=> We have 2 types of runners in spring boot
+
+       a) ApplicationRunner
+          =================
+       -> Use ApplicationRunner if you want to work with options more easily.
+       -> Gets the command-line arguments in a nicely organized way (you can check options, values, etc.).
+       -> Example: --file=test.txt --mode=read
+
+	b) CommandLineRunner
+          ===================
+       -> Use CommandLineRunner if you just need the plain arguments.
+       -> Gets the command-line arguments as a simple array of strings.
+       -> Example: ["arg1", "arg2"]
+
+@Component
+public class MyAppRunner implements ApplicationRunner{
+	
+	@Override
+	public void run(ApplicationArguments args) throws Exception {
+		System.out.println("my runner executed....");
+		// logic
+	}
+}
+
+Usecases : insert data in db, delete staging tables data, setup cache
+
+=========
+**lec-18
+=========
+====================
+Day-5 : Autowiring
+====================		
+
+=> It is used to perform dependency injection
+
+=> Injecting one bean object into another bean object is called as dependency injection.	
+
+=> We can perform dependency injection in 3 ways
+
+				1) setter injection
+				2) constructor injection
+				3) field injection
+
+Note: IoC container is responsible to perform dependency injection.
+
+=> IOC will manage and collaborate bean objects	
+
+=======================
+What is Spring Bean ?	
+=======================
+
+=> The java class which is managed by IoC is called as spring bean.
+
+
+====================================
+What is Constructor injection ?		
+===================================
+
+=> Injecting dependent bean object into target bean object using target class constructor is called as CI.
+
+=> To enable this we will write @Autowired at constructor level.
+
+Note: When we have only one parameterized constructor in target class then @Autowired is optional.
+
+
+@Service
+public class UserService {
+
+	private UserDao userDao;
+
+	public UserService() {
+		System.out.println("UserService:: default - constructor");
+	}
+
+	@Autowired
+	public UserService(UserDao userDao) {
+		System.out.println("UserService:: param - Constructor");
+		this.userDao = userDao;
+	}
+
+	public void getName(int id) {
+		String findName = userDao.findName(id);
+		System.out.println("Name ::" + findName);
+	}
+
+}	
+
+
+====================================
+What is setter injection ?		
+===================================
+
+=> Injecting dependent bean object into target bean object using target class setter method is called as SI.
+
+=> To enable this we will write @Autowired at setter method level.
+
+@Service
+public class UserService {
+
+	private UserDao userDao;
+
+	public UserService() {
+		System.out.println("UserService:: default - constructor");
+	}
+
+	@Autowired
+	public void setUserDao(UserDao userDao) {
+		this.userDao = userDao;
+	}
+
+	public void getName(int id) {
+		String findName = userDao.findName(id);
+		System.out.println("Name ::" + findName);
+	}
+}
+
+===========================
+What is field injection ?
+===========================
+=>
+"Spring allows field injection, but it is not recommended for real-world applications because it hides dependencies, makes unit testing harder, and doesn’t allow immutability. However, many developers still use it in small apps or POCs because it is simple and reduces boilerplate code. In production, we generally prefer constructor injection.”
+=> Injecting dependent bean object into target bean object using target bean variable is called as field injection.
+
+Note: Internally IOC will use reflection api to perform field injection.
+
+@Service
+public class UserService {
+
+	@Autowired
+	private UserDao userDao;
+
+	public void getName(int id) {
+		String findName = userDao.findName(id);
+		System.out.println("Name ::" + findName);
+	}
+
+}
+
+Note: Using reflection api we can access private variables outside of the class.
+
+
+public class User {
+
+	private int age = 20;
+
+	public int getAge() {
+		return age;
+	}
+}
+
+public class Test {
+
+	public static void main(String[] args) throws Exception { 
+
+		Class<?> clz = Class.forName("in.ashokit.bean.User");//this is used to load class into jvm
+
+ 		Object object = clz.newInstance();//used to get object
+
+
+		Field ageField = clz.getDeclaredField("age"); // loading variable
+		ageField.setAccessible(true); // making variable accessible
+		ageField.set(object, 50); // setting value to variable
+		
+		
+		User u = (User) object;
+		int age = u.getAge();
+		System.out.println("User Age :: " + age);
+
+	}
+
+}
+=======
+Lec-19
+========
+
+==================
+Autowiring modes
+==================
+
+=> Autowiring works based on modes
+
+1) byName  : Based on variable name it will identify dependent bean
+
+2) byType : Based on variable datatype it will identify dependent bean.
+
+
+==================================
+What is @Qualifier annotation ?
+==================================
+
+=> It is used to identify dependent bean based on bean name
+
+@Component
+public class Robot {
+
+	@Autowired
+	@Qualifier("chip64")
+	private IChip chip;
+
+}
+
+Note: IChip is an interface which is having 32bit & 64bit implementation classes.
+
+=> Based on above configuration it will inject the bean whose name is "chip64" 
+
+
+===============================================
+Q) What is Ambiguity problem in Autowiring ?
+===============================================
+
+=> If one interface having more than one impl class then we will get ambiguity problem in "byType" mode.
+
+=> To resolve byType ambiguity problem we can use @Primary annotation.
+
+=> The bean which is having @Primary annotation will get highest priority for autowiring.
+
+
+=====================
+What is Bean scope
+=====================
+
+=> Bean scope represents how many objects should be created for spring bean.
+
+=> By default every spring bean is singleton (only one object)
+
+=> We can customize bean scope using @Scope annotation
+
+=> prototype scope represents every time new object.
+
+
+Note: For singleton beans  objects will be created when ioc container starting.
+
+
+@Component
+@Scope("prototype")
+public class Robot {
+		//logic
+}
+
+==========================================================
+
+@SpringBootApplication
+
+	- @SpringBootConfiguration
+	- @EnableAutoConfiguration
+	- @ComponentScan
+
+@Configuration
+@Bean
+@Component
+@Service
+@Repository
+@Autowired
+@Qualifier
+@Primary
+@Scope 
+
+==================================
+CI ---> target class constructor
+==================================
+
+=> dependent bean is mandatory to create target bean
+
+=> if dependent bean not available then target bean can't created.
+
+=> first dependent bean obj will be created then only target bean object will be created.
+
+=====
+GPT
+=====
+ Dependent bean is mandatory to create the target bean
+* Explanation :-
+-In Constructor Injection (CI), the dependent bean must be available for the Spring container to create the target bean.
+-If the dependent bean is missing, the Spring application will fail to start.
+
+* Example :-
+ 
+@Component
+public class Engine {
+    public Engine() {
+        System.out.println("Engine created");
+    }
+}
+
+@Component
+public class Car {
+    private final Engine engine;
+
+    @Autowired
+    public Car(Engine engine) {  // Constructor Injection
+        this.engine = engine;
+        System.out.println("Car created");
+    }
+}
+
+* How it works:-
+
+-Spring first creates the Engine bean.
+-Then, it injects the Engine bean into the Car constructor.
+-Finally, the Car bean is created.
+
+* What happens if Engine is missing? :-
+If we remove @Component from Engine, Spring cannot create the Car bean because it requires Engine in the constructor.
+--------------------------------------------------------------------------------------------------------
+==================================
+SI --> target class setter method
+==================================
+
+=> First the dependent bean object is created, then the target bean object is created,   
+ and finally Spring calls the setter method to inject the dependent bean..
+
+======
+GPT
+======
+
+Setter Injection (SI) in Spring Boot - Step by Step Explanation
+-Setter Injection (SI) is a dependency injection method where dependencies are injected after the target bean is created using setter methods.
+
+Point 1: First, the target bean object is created, then the dependent bean object is created
+
+Explanation:-
+
+In Setter Injection, Spring first creates the target bean (even if dependencies are missing).
+After that, it injects the dependent bean by calling the setter method.
+If the dependency is not available, the setter method is simply not called, and the application still runs without error.
+
+Example:-
+
+@Component
+public class Engine {
+    public Engine() {
+        System.out.println("🚗 Engine created");
+    }
+}
+
+@Component
+public class Car {
+    private Engine engine;
+
+    public Car() {
+        System.out.println("🚘 Car created");
+    }
+
+    @Autowired
+    public void setEngine(Engine engine) {
+        this.engine = engine;
+        System.out.println("🔧 Engine set in Car");
+    }
+}
+
+Execution Order
+1️⃣ Spring first creates the Car bean, calling the Car() constructor.
+2️⃣ Then, Spring creates the Engine bean.
+3️⃣ Finally, Spring calls setEngine() to inject Engine into Car.
+
+Output
+Arduino
+
+
+🚘 Car created
+🚗 Engine created
+🔧 Engine set in Car
+👉 Car is created first, then Engine, and finally, the setter method is called.
+--------------------------------------------------------------------------------
+Point 2: After the target bean is created, the setter method is called (optional)
+
+Explanation:-
+-If the setter method is not marked with @Autowired, Spring won't inject the dependency.
+-This means that Setter Injection is optional, and Car can exist without an Engine bean.
+-This is different from Constructor Injection, where missing dependencies cause errors.
+
+Example Without @Autowired (Optional Dependency)
+
+@Component
+public class Car {
+    private Engine engine;
+
+    public Car() {
+        System.out.println("🚘 Car created");
+    }
+
+    publiic void setEngine(Engine engine) {  // No @Autowired
+        this.engne = engine;
+        System.out.println("🔧 Engine set in Car");
+    }
+}
+
+What Happens If Engine Is Missing?
+Spring will still create Car.
+The setEngine() method is never called, and Car will have engine = null.
+Output (If Engine is missing)
+------------------------------------------------------------------------
+🚘 Car created
+👉 Since setEngine() was not called, Car is created without Engine.
+
+Comparison: Constructor Injection vs Setter Injection
+Aspect                       	    Constructor Injection (CI)	              Setter Injection (SI)
+Target bean created first?	   ❌ No, dependent bean is created first    ✅ Yes, target bean is created first
+Dependency required?	           ✅ Yes, mandatory	         	      ❌ No, optional
+Application fails if dependency is missing?	✅ Yes         		      ❌ No
+Setter method is required?	❌ No setter method required	              ✅ Needs setter method 
+---------------------------------------------------------------------------------------------------------------
+==================================
+FI --> target class variable
+==================================
+
+=> IOC will use reflection api to perform FI.
+
+=> Field Injections is simple to write.
+
+=> IOC violating oops principles.
+
+=> It is giving chance to violate Single Responsibility principle.
+
+=======
+GPT
+========
+
+Field Injection (FI) in Spring Boot - Step by Step Explanation
+Point 1: FI Violates OOP Principles (Encapsulation)
+Explanation
+In Object-Oriented Programming (OOP), one key principle is Encapsulation, which means hiding data and controlling how it is accessed.
+Field Injection (FI) breaks this principle because dependencies are injected directly into private fields, bypassing constructors or setters.
+Example of FI Violating Encapsulation
+
+@Component
+public class Car {
+    
+    @Autowired  // Field Injection
+    private Engine engine;
+
+    public void start() {
+        engine.run();
+    }
+}
+👉 Problem:
+
+The Car class directly depends on Engine, and there is no way to enforce proper initialization from outside.
+Encapsulation is broken because engine is injected automatically without control.
+If Engine is missing, Car still exists but is incomplete.
+
+✅ Better Approach: Use Constructor Injection
+
+@Component
+public class Car {
+    private final Engine engine;
+
+    @Autowired
+    public Car(Engine engine) {  // Constructor Injection
+        this.engine = engine;
+    }
+
+    public void start() {
+        engine.run();
+    }
+}
+
+✔ Now, Car cannot exist without Engine, following proper OOP principles.
+
+Point 2: FI Gives a Chance to Violate the Single Responsibility Principle (SRP)
+
+Explanation :-
+
+SRP states that a class should have only one responsibility.
+With Field Injection, it’s easy to keep adding dependencies without realizing that the class is taking on multiple responsibilities.
+Example of SRP Violation Using FI
+
+
+@Component
+public class OrderService {
+
+    @Autowired
+    private PaymentService paymentService;  // Handles payments
+
+    @Autowired
+    private NotificationService notificationService;  // Sends notifications
+
+    @Autowired
+    private InventoryService inventoryService;  // Manages stock
+
+    public void processOrder(Order order) {
+        inventoryService.updateStock(order);
+        paymentService.processPayment(order);
+        notificationService.sendConfirmation(order);
+    }
+}
+
+👉 Problem:
+
+OrderService is handling too many things:
+✅ Payment Processing
+✅ Inventory Management
+✅ Notifications
+This violates SRP because OrderService has more than one reason to change.
+If the notification system changes, OrderService must also be modified, even though it should only handle order.
+
+✅ Better Approach: Use Separate Services
+
+@Component
+public class OrderService {
+    private final PaymentService paymentService;
+    private final InventoryService inventoryService;
+
+    @Autowired
+    public OrderService(PaymentService paymentService, InventoryService inventoryService) {
+        this.paymentService = paymentService;
+        this.inventoryService = inventoryService;
+    }
+
+    public void processOrder(Order order) {
+        inventoryService.updateStock(order);
+        paymentService.processPayment(order);
+    }
+}
+
+✔ Responsibilities are now separated, making OrderService cleaner and easier to maintain.
+
+✅ Final Thoughts
+Problem with Field Injection (FI)    | Why?
+Violates OOP Principles-- Breaks Encapsulation by injecting dependencies directly into private fields.
+Violates SRP--Makes it easy to add multiple responsibilities in one class.
+Harder to Test--Cannot create object manually in tests because Spring injects fields.
+🚀 Use Constructor Injection instead of Field Injection to follow OOP principles and SOLID design
+
+
+==================================================================
+Difference Between @Component, @Service, and @Repository in Spring
+==================================================================
+
+Spring provides three specializations of the @Component annotation: @Service and @Repository, which are used to define different types of Spring beans. Here’s a detailed breakdown of each:
+
+1. @Component
+-Definition: A generic stereotype annotation for any Spring-managed component.
+-Purpose: It marks a class as a Spring bean, allowing it to be detected by component scanning.
+-Use Case: Suitable for utility classes, helper components, or general-purpose Spring beans.
+ 
+2. @Service
+-Definition: A specialization of @Component used to define service-layer beans.
+-Purpose: Indicates that the class contains business logic. It improves code readability and semantic clarity.
+-Use Case: Used in the service layer to handle business logic.
+ 
+3. @Repository
+-Definition: A specialization of @Component for the persistence layer.
+-Purpose: Indicates that the class handles database operations and provides exception translation (Spring converts database-related exceptions to Spring-specific exceptions).
+-Use Case: Used for DAO (Data Access Object) classes that interact with databases.
+
+
+=====================================
+Summary  for revision refer lec_No- 20(36.00) 
+=====================================
+
+1) What is Spring Boot
+
+2) Spring Boot Advantages
+
+			- pom starters
+			- auto configuration
+			- embedded servers
+			- actuators
+
+3) First Boot Application			
+
+4) Boot Application Folder Structure (Maven)
+
+5) What is start class in Spring Boot
+
+			- @SpringBootApplication
+			- SpringApplication.run ()
+
+6) What is Component Scanning
+
+7) How run ( ) method works internally
+
+			- bootstrap our app
+			- start listeners
+			- prepare env
+			- print banner
+			- create IOC
+			- call runners
+			- return IOC		
+
+8) How to customize banner in boot app
+
+9) How ioc will start in boot application ?
+
+10) Runners in Spring Boot
+
+			 - Application Runner
+			 - Commandline Runner
+
+11) Spring Boot Annotations
+
+			 - @SpringBootApplication
+			 - @Configuration
+			 - @Bean
+			 - @Component
+			 - @Service
+			 - @Repository			 
+
+12) Bean Scopes (@Scope)
+
+			 - singleton
+			 - prototype
+			 - request 
+			 - session
+
+13) Autowiring
+			
+			- byName
+			- byType
+			- @Autowired
+			- @Qualifier
+			- @Primary
+
+14) What is Dependency Injection
+
+			- Constructor Injection
+			- Setter Injection
+			- Field Injection
+
+15) What is IOC container	
+
+
+
+
+
+
+
+
