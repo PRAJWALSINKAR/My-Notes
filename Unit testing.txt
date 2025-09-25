@@ -1,0 +1,109 @@
+Unit testing:
+============
+
+-@Test
+
+Explanation: This annotation tells JUnit (a Java testing framework) that the method below is a test method.
+It indicates that this method should be run as a test when using a test runner.
+You must import it from org.junit.Test.
+
+-assertEquals(expectedRes, actualRes);
+
+Explanation: This is an assertion provided by JUnit.
+It compares the expectedRes and actualRes. If they are equal, the test passes.
+If they are not equal, the test fails, indicating a potential bug in the mul() method.
+
+-@SpringBootTest
+
+Explanation: This annotation tells Spring Boot to start the full application context for testing.
+It’s useful when you want to test how different components work together, not just in isolation.
+It loads all the beans like in a real application, so the test class behaves as if it's running inside the Spring Boot app.
+
+
+
+-@ExtendWith(value = { MockitoExtension.class })
+
+
+Explanation: This is a JUnit 5 annotation that tells the test to use Mockito’s features, like mock injections.
+It's typically used in pure Mockito tests, but when you're using @SpringBootTest, this annotation may not be necessary unless you're doing hybrid mocking (can be omitted here).
+However, it's not harmful and works for enabling Mockito annotations.
+
+-@MockBean
+
+@MockBean tells Spring to create a mock object of UserDao and inject it into the application context.
+So when Spring initializes UserService (which depends on UserDao), it injects this mock instead of a real DAO implementation.
+This is useful for unit testing the service layer without hitting the database.
+
+
+-@InjectMocks
+
+This tells Mockito to inject the mock dependencies (like userDao) into this UserService instance.
+Since @SpringBootTest is also in use, Spring will usually handle this automatically, but it can act as a safeguard for manual setup.
+This makes sure you're testing a UserService instance with a mocked UserDao.
+
+
+-two ways :
+-----------
+
+@SpringBootTest
+public class MsgServiceTest {
+	
+	@Autowired
+	private MsgService service;
+	
+
+//	private MsgService service = new MsgService(); // No Autowiring no SpringBootTest required
+	
+}
+
+
+-@WebMvcTest(controllers = MsgRestController.class)
+
+Loads only the web layer (Spring MVC components like @Controller, @RestController, @ControllerAdvice)
+It does not load full Spring context.
+It scans and initializes only MsgRestController.
+Other beans like MsgService must be provided as mocks.
+
+-@Autowired
+ private MockMvc mockMvc;
+
+Purpose: Injects a MockMvc object.
+MockMvc is a Spring utility to simulate HTTP requests (GET, POST, etc.) to controller endpoints without starting a server.
+Used to simulate real client requests.
+
+for below table follow 58 app
+
+| Annotation / Line                      | Purpose                                       |
+| -------------------------------------- | --------------------------------------------- |
+| `@WebMvcTest(MsgRestController.class)` | Loads only the web layer (controller)         |
+| `@MockBean MsgService`                 | Mocks the service and injects into controller |
+| `@Autowired MockMvc`                   | Used to send fake HTTP requests to controller |
+| `when(...).thenReturn(...)`            | Defines mock behavior                         |
+| `MockMvcRequestBuilders.get("/path")`  | Builds a mock GET request                     |
+| `mockMvc.perform(...)`                 | Sends the request and returns the response    |
+| `assertEquals(...)`                    | Validates expected vs actual result           |
+
+
+
+
+PostRequest:
+------------
+
+| **Item**                               | **Explanation**                                                             |
+| -------------------------------------- | --------------------------------------------------------------------------- |
+| `@WebMvcTest`                          | Loads **only the controller layer**. Doesn't load services or full context. |
+| `MockMvc`                              | Utility to simulate HTTP requests and test Spring controllers.              |
+| `@Autowired`                           | Injects Spring-managed beans like `MockMvc` into the test class.            |
+| `@Test`                                | Marks a method as a JUnit test case.                                        |
+| `MockMvcRequestBuilders.post("/url")`  | Creates a mock **POST** request to the specified URL.                       |
+| `.contentType("application/json")`     | Specifies the **Content-Type** of the request.                              |
+| `.content(...)`                        | Sets the **request body** for the HTTP call.                                |
+| `ObjectMapper.writeValueAsString(obj)` | Converts a Java object to its JSON string equivalent.                       |
+| `MvcResult`                            | Holds the result of the HTTP request.                                       |
+| `MockHttpServletResponse`              | Represents the HTTP response; used to extract status, headers, body.        |
+| `assertEquals(expected, actual)`       | Verifies that the actual result matches the expected one.                   |
+
+
+
+
+
