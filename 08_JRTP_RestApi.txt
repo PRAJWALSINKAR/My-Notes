@@ -1,0 +1,178 @@
+Value annotation :
+==================
+=> if you are having only 1 or 2 properties then it is recommended to store values
+=> if we use value annotation then on changes we just need to restart the server 
+
+@RestController
+public class MsgRestController {
+	
+	@Value("${welcomeMsg}")
+	private String wmsg;
+	
+	@Value("${greetMsg}")
+	private String gmsg;
+	
+	
+	@GetMapping("/welcome")
+	private String  getWelcomeMsg() {
+//		String msg = "welcome to ashok  it";//if you save value like this then at each time  while changes you need to compile,package and deploy
+		return wmsg;
+	}
+	
+	@GetMapping("/greet")
+	public String getGreetMsg() {
+//		String msg = "Good morning";
+		return gmsg;
+	}
+
+}
+
+properties file:
+----------------
+welcomeMsg = Welcome to ashok it..from propertty!!
+greetMsg = Good morning from pro
+
+
++---------------------------------------------------------------+
+|                                                               |
+|   +--------+         +-------------------------+              |
+|   |  C - 1 |-------> |                         |              |
+|   +--------+         |      AppProperties      |              |
+|   +--------+         |   +---------------+     |              |
+|   |  C - 2 |-------> |   |     Map       | <---|----+         |
+|   +--------+         |   +---------------+     |    |         |
+|   +--------+         +-------------------------+    |         |
+|   |  C - 3 |----------------------------------------+         |
+|   +--------+                                        |         |
+|                                                     V         |
+|                                             +---------------+ |
+|                                             | application.yml| |
+|                                             |     ...       | |
+|                                             |     ...       | |
+|                                             +---------------+ |
+|                                                               |
++---------------------------------------------------------------+
+
+
+
+--> Keeps Code Organized: The main job (like replying to website visitors) is kept in one part (the controller), and message storage is kept in another part (AppProperties). This keeps things tidy.
+
+--> Easy to Update Messages: All your greeting or welcome texts are in one file. If you want to change a message, just edit it there—no need to search through your code.
+
+--> Prevents Mistakes: Using keywords (constants) for messages means you won’t accidentally misspell a message name. If you need to change it, you only change it once.
+
+--> Reuse Messages Anywhere: Any part of your app can get these messages easily, so you don’t have to repeat code.
+
+--> Ready for Different Languages: If you ever want to show your messages in another language, just change the separate file—not the main code.
+
+--> Works for Different Setups: You can give different messages in testing and real use by changing the message files, without touching your main code.
+
+--> Flexible and Easy to Test: If you want to test with different messages, you can just swap the files.
+
+==> In short:
+This setup makes your code neater, safer, easier to change, and ready for bigger projects!
+
+
+------------------------------------
+Spring Boot: External Configuration 
+(YAML + @ConfigurationProperties)
+------------------------------------
+
+1. Purpose of the Setup:
+------------------------
+- To externalize configuration values using `application.yml`
+- To access custom properties (like welcome/greet messages) inside the Java code
+- This makes the application more flexible and easy to manage without changing Java code for every config change
+
+2. application.yml File:
+------------------------
+- YAML file is used for configuring Spring Boot application
+- Below is the structure:
+  
+  server:
+    port: 9090              --> Application runs on port 9090
+
+  spring:
+    application:
+      name: prajwa_api      --> Name of the application
+
+  app:
+    messages:
+      welcomeMsg: Welcome to prajwal It..!  --> Custom message
+      greetMsg: Good Morning..!             --> Custom message
+
+- The prefix `app` and `messages` define a nested property structure.
+- These values will be read into a Map in the Java code.
+
+3. AppProperties.java (POJO + Configuration):
+---------------------------------------------
+- @Configuration: Marks this as a Spring bean.
+- @EnableConfigurationProperties: Tells Spring to bind external properties.
+- @ConfigurationProperties(prefix = "app"): Binds properties starting with 'app'
+
+    Example:
+    app.messages.welcomeMsg  --> will be mapped as messages["welcomeMsg"]
+    app.messages.greetMsg    --> will be mapped as messages["greetMsg"]
+
+- We used a Map<String, String> to hold dynamic message keys and values.
+
+4. AppConstants.java:
+---------------------
+- A constants class to avoid hardcoding property keys directly.
+- Improves maintainability and avoids typo errors.
+
+  public static final String GREET_MSG_KEY = "greetMsg";
+  public static final String WELCOME_MSG_KEY = "welcomeMsg";
+
+- Use these constants wherever we want to access the values.
+
+5. MsgRestController.java:
+--------------------------
+- @RestController: To expose REST APIs
+- @Autowired AppProperties: Injects the config bean
+
+- Two GET endpoints:
+  
+  1. /greet:
+     - Returns value for key "greetMsg" from messages map
+     - Response: "Good Morning..!"
+
+  2. /welcome:
+     - Returns value for key "welcomeMsg"
+     - Response: "Welcome to prajwal It..!"
+
+  Example:
+    URL: http://localhost:9090/greet      --> Output: Good Morning..!
+    URL: http://localhost:9090/welcome    --> Output: Welcome to prajwal It..!
+
+6. Why Use `name`, `prefix`, and Map Structure?
+-----------------------------------------------
+- The `name` under spring.application is optional but helpful for discovery, logging, and service registry in microservices.
+
+- The `prefix = "app"` in `@ConfigurationProperties`:
+   --> Tells Spring to only bind properties starting with "app"
+
+- Using a `Map<String, String>` for messages:
+   --> Allows flexibility to add more message keys in YAML without changing Java structure.
+
+   Example:
+     Just add:
+     app:
+       messages:
+         newYearMsg: Happy New Year..!
+     --> And retrieve using: messages.get("newYearMsg")
+
+---------------------------------------
+Advantages of This Approach:
+---------------------------------------
+- Clean separation of config and code
+- Easy to update messages without touching Java code
+- Scalable: You can keep adding messages without new fields
+- Follows best practices in Spring Boot
+
+
+
+
+
+
+
